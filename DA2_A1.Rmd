@@ -39,9 +39,72 @@ ggplot(data = df, aes(x = sex, y = earnwke)) +
   scale_x_continuous(limits=c(1, 2),     breaks= seq(1, 2, by=1))
 ```
 
+## Gender gap with education level
 
+In this section I examine the gender wage gap with the added factor, the level of education. In the original dataset, the level of education is a number, so as a first step I added a new column to the dataset with the text forms of the education level.
 
+```{r}
+f <- df %>% 
+  mutate(education_lvl = case_when(grade92 == 34 ~ '7th or 8th',
+                                   grade92 == 37 ~ '11th',
+                                   grade92 == 38 ~ '12th grade NO DIPLOMA',
+                                   grade92 == 39 ~ 'High school graduate, diploma or GED',
+                                   grade92 == 40 ~ 'Some college but no degree',
+                                   grade92 == 41 ~ 'Associate degree -- occupational/vocational',
+                                   grade92 == 42 ~ 'Associate degree -- academic program',
+                                   grade92 == 43 ~ 'Bachelors degree (e.g. BA,AB,BS)',
+                                   grade92 == 44 ~ 'Masters degree (e.g. MA,MS,MEng,Med,MSW,MBA)',
+                                   grade92 == 45 ~ 'Professional school deg. (e.g. MD,DDS,DVM,LLB,JD)',
+                                   grade92 == 46 ~ 'Doctorate degree (e.g. PhD, EdD)'))
+```
 
+Before the regression model, I'd like to take a look at the dataset with the help of the datasummary function, to see if there are some differences, that are immediately obvious:
 
+```{r, echo=F}
+library(modelsummary)
+P95 <- function(x){ quantile(x,.95,na.rm=T)}
+datasummary( as.factor(sex) * (age + earnwke + grade92) ~ Mean + SD + Min + Max + Median + P95 + N , data = df )
+```
+
+We can see, that even though the education level of males and females are basically the same, moreover females are a little older than males, the average weekly earnings of males are almost 400 $ greater than the female earnings. We can also see that the male mean is 220 dollars greater than the male median, which indicates a model that is skewed to the left side (there are outlier values). This difference is only 120 dollars in case of females.
+
+Now let's take a look at the regression table:
+
+```{r, echo=F}
+reg2 <- feols( earnwke ~ sex + grade92 , data = df )
+```
+
+The intercept shows the case when sex is male and the education level is 0 (of course that is not realistic, in our data the lowest level is 34 which is 7th or 8th grade). Sex means the difference in weekly earnings accounted by the sex variable and grade92 means the same thing for education. We can see that the relationship of weekly earnings and education is positive. The adjusted R2 score is 12% now and the coefficients are again significant on a high level. 
+
+I was curious to see a model, where the education levels are aggregated to a higher level. So I made three groups:
+
+```{r}
+df1 <- df %>% 
+  mutate(education_lvl_2 = case_when(grade92 >= 34  & grade92 <=39 ~ 'High School diploma or lower',
+                                     grade92 >= 40  & grade92 <=43 ~ 'Bachelor or lower',
+                                     grade92 >= 44  & grade92 <=46 ~ 'Post graduate diploma and Doctorate'))
+```
+
+The groups are arbitrary. I added 'Doctorate degree (e.g. PhD, EdD)' to the 'Post graduate diploma' level, because in the previous group there were only 6 employees.
+
+```{r, echo=F}
+feols( earnwke ~ sex + education_lvl_2 , data = df1 )
+```
+
+The Intercept this time shows the males in the 'Bachelor or lower' group. Compared to this value, the female expected earnings lower by -301.28 dollars. We can see, that in case of a High school diploma or lower level education, the expected earnings are lower by 288.121 (compared to the 'Bachelor or lower' group), while the post graduate and doctorate group is expected to earn 209.328 dollars more as the base group. This model has a slightly less R2 value than the previous with around 0.089. 
+
+Lastly, I'd like to take a look at the yhat - y graph:
+
+```{r, echo=F}
+df1$earnwke_hat <- reg2$fitted.values
+
+ggplot(data = df1, aes(x = earnwke_hat, y = earnwke)) +
+  geom_point( size = 1.2, fill='red', alpha = 0.8, show.legend=F, na.rm = TRUE) + 
+  geom_smooth(method="lm",formula=y~x,se=F) +
+  coord_cartesian(xlim = c(0, 3000), ylim = c(0, 3000)) +
+  theme_bw()
+```
+
+We can see based on the graph, that the model doesn't predict the weekly earnings above the 200 dollar level. 
 
 
