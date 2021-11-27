@@ -1,0 +1,28 @@
+---
+title: "DA2 - Assingment 1" 
+author: "Oszkar"
+date: "11/27/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(ggplot2)
+library(fixest)
+
+df <- read_csv("https://raw.githubusercontent.com/oegervari/Data_analysis_2/main/data/morg-2014-emp.csv")
+
+df <- df %>% filter(occ2012 == 800) %>% filter(earnwke > 50) %>% mutate(occupation = 'Accountants and auditors')
+
+```
+
+## Introduction
+
+In this assignment I examine the gender wage gap difference in the [cps-earningsdatase](https://osf.io/g8p9j/) dataset. First I take a look at the unconditional gender gap, then I will attempt to how how the gender gap varies with the level education.
+
+From the dataset I chose the 'Accountants and auditors' profession with occupation code 800.
+
+
+## Unconditional gender gap
+
+
