@@ -25,4 +25,23 @@ From the dataset I chose the 'Accountants and auditors' profession with occupati
 
 ## Unconditional gender gap
 
+```{r, echo=F}
+feols( earnwke ~ sex , data = df )
+```
+
+The table shows us that the Intercept is 1757.979, which in this case means the expected male weekly earnings. The coefficient 'sex' has a value of -338.624, which means that females are expected to earn less than males by this amount. The t values of the coefficients are very small, which means that the probability that the observed wage gap difference between sexes is due to chance, is unlikely. 
+The adjusted R2 score of this model is around 0.06, which means that 6% of the wage difference is explained by sex.
+
+```{r, echo=F}
+ggplot(data = df, aes(x = sex, y = earnwke)) +
+  geom_point()+ 
+  geom_smooth(method="lm")+
+  scale_x_continuous(limits=c(1, 2),     breaks= seq(1, 2, by=1))
+```
+
+
+
+
+
+
 
