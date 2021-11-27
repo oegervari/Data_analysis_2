@@ -28,10 +28,28 @@ ggplot(data = df, aes(x = sex, y = earnwke)) +
   geom_smooth(method="lm")+
   scale_x_continuous(limits=c(1, 2),     breaks= seq(1, 2, by=1))
 
+## gender gap + education level
+#checking unique education values
 
+df %>% select(grade92) %>% unique() %>% arrange(grade92)
 
+# Adding new column with education names
 
+df <- df %>% 
+  mutate(education_lvl = case_when(grade92 == 34 ~ '7th or 8th',
+                                   grade92 == 37 ~ '11th',
+                                   grade92 == 38 ~ '12th grade NO DIPLOMA',
+                                   grade92 == 39 ~ 'High school graduate, diploma or GED',
+                                   grade92 == 40 ~ 'Some college but no degree',
+                                   grade92 == 41 ~ 'Associate degree -- occupational/vocational',
+                                   grade92 == 42 ~ 'Associate degree -- academic program',
+                                   grade92 == 43 ~ 'Bachelors degree (e.g. BA,AB,BS)',
+                                   grade92 == 44 ~ 'Masters degree (e.g. MA,MS,MEng,Med,MSW,MBA)',
+                                   grade92 == 45 ~ 'Professional school deg. (e.g. MD,DDS,DVM,LLB,JD)',
+                                   grade92 == 46 ~ 'Doctorate degree (e.g. PhD, EdD)'))
 
+reg2 <- feols( earnwke ~ sex + grade92 , data = df )
+reg2
 
 
 
