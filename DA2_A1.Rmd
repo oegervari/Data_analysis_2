@@ -1,6 +1,6 @@
 ---
 title: "DA2 - Assingment 1" 
-author: "Oszkar"
+author: "Oszkar Egervari"
 date: "11/27/2021"
 output: pdf_document
 ---
@@ -18,7 +18,7 @@ df <- df %>% filter(occ2012 == 800) %>% filter(earnwke > 50) %>% mutate(occupati
 
 ## Introduction
 
-In this assignment I examine the gender wage gap difference in the [cps-earningsdatase](https://osf.io/g8p9j/) dataset. First I take a look at the unconditional gender gap, then I will attempt to how how the gender gap varies with the level education.
+In this assignment I examine the gender wage gap difference in the [cps-earningsdatase](https://osf.io/g8p9j/) dataset. First I take a look at the unconditional gender gap, then I will attempt to show how the gender gap varies with the level education.
 
 From the dataset I chose the 'Accountants and auditors' profession with occupation code 800.
 
@@ -41,7 +41,7 @@ ggplot(data = df, aes(x = sex, y = earnwke)) +
 
 ## Gender gap with education level
 
-In this section I examine the gender wage gap with the added factor, the level of education. In the original dataset, the level of education is a number, so as a first step I added a new column to the dataset with the text forms of the education level.
+In this section I examine the gender wage gap with the added factor of education level. In the original dataset, the level of education is a number, so as a first step I added a new column to the dataset with the text forms of the education level.
 
 ```{r}
 f <- df %>% 
@@ -72,6 +72,7 @@ Now let's take a look at the regression table:
 
 ```{r, echo=F}
 reg2 <- feols( earnwke ~ sex + grade92 , data = df )
+reg2
 ```
 
 The intercept shows the case when sex is male and the education level is 0 (of course that is not realistic, in our data the lowest level is 34 which is 7th or 8th grade). Sex means the difference in weekly earnings accounted by the sex variable and grade92 means the same thing for education. We can see that the relationship of weekly earnings and education is positive. The adjusted R2 score is 12% now and the coefficients are again significant on a high level. 
@@ -91,7 +92,7 @@ The groups are arbitrary. I added 'Doctorate degree (e.g. PhD, EdD)' to the 'Pos
 feols( earnwke ~ sex + education_lvl_2 , data = df1 )
 ```
 
-The Intercept this time shows the males in the 'Bachelor or lower' group. Compared to this value, the female expected earnings lower by -301.28 dollars. We can see, that in case of a High school diploma or lower level education, the expected earnings are lower by 288.121 (compared to the 'Bachelor or lower' group), while the post graduate and doctorate group is expected to earn 209.328 dollars more as the base group. This model has a slightly less R2 value than the previous with around 0.089. 
+The Intercept this time shows the males in the 'Bachelor or lower' group. Compared to this value, the female expected are earnings lower by -301.28 dollars. We can see, that in case of a 'High school diploma or lower' level education, the expected earnings are lower by 288.121 (compared to the 'Bachelor or lower' group), while the post graduate and doctorate group is expected to earn 209.328 dollars more as the base group. This model has a slightly less R2 value than the previous with around 0.089. 
 
 Lastly, I'd like to take a look at the yhat - y graph:
 
@@ -102,9 +103,17 @@ ggplot(data = df1, aes(x = earnwke_hat, y = earnwke)) +
   geom_point( size = 1.2, fill='red', alpha = 0.8, show.legend=F, na.rm = TRUE) + 
   geom_smooth(method="lm",formula=y~x,se=F) +
   coord_cartesian(xlim = c(0, 3000), ylim = c(0, 3000)) +
+  labs(x = "Expected weekly earnings",y = "Actual weekly earnigns")+
   theme_bw()
 ```
 
-We can see based on the graph, that the model doesn't predict the weekly earnings above the 200 dollar level. 
+We can see based on the graph, that the model doesn't predict the weekly earnings above the 2000 dollar level. 
+
+## Conclusion
+
+It can be concluded based on the regression models, that there is a difference (significant on a high level) between the weekly earnings of the sexes in the dataset used, among the 'Accountants and auditors' profession. Furthermore, we can say, that if the level of education is higher, the expected earnings are also higher.
+
+
+
 
 
