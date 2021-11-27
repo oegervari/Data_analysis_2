@@ -51,11 +51,35 @@ df <- df %>%
 reg2 <- feols( earnwke ~ sex + grade92 , data = df )
 reg2
 
+# Adding new column with education types (multiple options aggregated)
+df1 <- df %>% 
+  mutate(education_lvl_2 = case_when(grade92 >= 34  & grade92 <=39 ~ 'High School diploma or lower',
+                                     grade92 >= 40  & grade92 <=43 ~ 'Bachelor or lower',
+                                     grade92 >= 44  & grade92 <=45 ~ 'Post graduate diploma',
+                                     grade92 == 46 ~ 'Doctorate degree (e.g. PhD, EdD)'))
 
+# checking the number of employees per each group
+df1 %>% select(education_lvl_2) %>% group_by(education_lvl_2) %>% count()
 
+# since there is only 6 people in the Doctorate degree group, I add them to the Post graduate group
+df1 <- df %>% 
+  mutate(education_lvl_2 = case_when(grade92 >= 34  & grade92 <=39 ~ 'High School diploma or lower',
+                                     grade92 >= 40  & grade92 <=43 ~ 'Bachelor or lower',
+                                     grade92 >= 44  & grade92 <=46 ~ 'Post graduate diploma and Doctorate'))
 
+reg3 <- feols( earnwke ~ sex + education_lvl_2 , data = df1 )
+reg3
 
+# adding yhat - y graph
+df1$earnwke_hat <- reg2$fitted.values
 
+ggplot(data = df1, aes(x = earnwke_hat, y = earnwke)) +
+  geom_point( size = 1.2, fill='red', alpha = 0.8, show.legend=F, na.rm = TRUE) + 
+  geom_smooth(method="lm",formula=y~x,se=F) +
+  coord_cartesian(xlim = c(0, 3000), ylim = c(0, 3000)) +
+  theme_bw()
+
+datasummary(earnwke + earnwke_hat ~ Mean + SD + Min + Max + Median + P95 + N , data = df1 )
 
 
 
