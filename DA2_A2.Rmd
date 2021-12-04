@@ -44,7 +44,7 @@ data$highly_rated <- ifelse(data$rating >= 4, 1, 0)
 asd <- summary(data$highly_rated)  #  mean is 0.6, means that 60% of hotels are highly rated
 ```
 
-I created a binary variable based on the hotel ratings, if a hotel is rated 4 or above, the highly_rated column takes a value of 1, in other cases 0. Based on this, the mean value of this variable for the dataset is `r asd[4]`. That is also the probability of a hotel being highly rated in Berlin.
+I created a binary variable based on the hotel ratings, if a hotel is rated 4 or above, the highly_rated column takes a value of 1, otherwise 0. Based on this, the mean value of this variable for the dataset is `r round(asd[4],3)`. That is also the probability of a hotel being highly rated in Berlin.
 
 As the next step, I calculated the predictions of high rating (of hotels) using the linear probability, logit and probit models and plotted the results in the following graph.
 
@@ -85,7 +85,7 @@ ggplot(data = data[1:4200,]) +
 
 ```
 
-The 45 degree line is the linear probability model, the two S-curves are the logit and probit models. Based on the eye-test, the results look similar, but let's take a look at the coefficient results in the next chart. 
+The 45 degree line is the linear probability model, the two S-curves are the logit and probit models. Based on the eye-test, the results look fairly similar, but let's take a look at the coefficient results in the next chart. 
 
 ```{r, echo=FALSE, warning=FALSE, fig.width=4, fig.height = 3, fig.align="center" }
 # Including the marginals:
@@ -99,15 +99,75 @@ msummary( pmodels ,
           coef_rename = cm)
 
 ```
-In case of logit and probit models, instead of the raw coefficients, we interpret the marginal differences, which have the same interpretation as the coefficients in case of linear probability models. 
-Based on this, we can see that the three models produce very similar results.
-The coefficients in case of LPM in the chart mean that if the distance takes on a value larger by 0.1 km, the probability of high rating is smaller by 1.6%. If the star has a larger value (4 instead of 3), the probability of being highly rated is 25.7% larger
+In case of logit and probit models, instead of the raw coefficients, we use the marginal differences, which have the same interpretation as the coefficients in case of linear probability models. 
+Based on this, the three models produce very similar results.
+If we look at the logit marginals we can see, that if the distance is greater, we can expect the probability of high rating to be lower by `r round(logit_marg$mfxest[1]*-100, 2)`%. And if a hotel possesses more stars, the probability of it being highly rated is greater by `r round(logit_marg$mfxest[2]*100, 2)`%.
+
+```{r, echo=FALSE}
+fitstat_register("brier", function(x){mean(x$residual^2)}, "Brier score")
+dsa <- etable( lpm, logit, probit , drop = "factor|lspline|income|exerc",fitstat = ~ brier  )
+```
+
+In terms of goodness of fit, based on the Brier-score, the LPM model provides the best prediction with a value of `r round(as.numeric(dsa$lpm[9]), 2)`. The whole table can be found in the appendix.
 
 
 ## Conclusion
 
-HERE COMES WHAT WE HAVE LEARNED AND WHAT WOULD STRENGHTEN AND WEAKEN OUR ANALYSIS.
+We can conclude, that not surprisingly the farther the hotel from the city center, the lower the possibility of a high rating. Even less surprising, that the higher the number of a stars, the higher the possibility of a high rating. It should be noted, that probably in Berlin, where there is no definite city center, like in Budapest for example, the so called distance variable might not have a strong relationship with the probability of high rating, since the people, who visit Berlin, usually have different preferences in terms of choosing a location for accommodation.
 
 ## Appendix
 
-Here comes all the results which are referenced and not essential for understanding the MAIN results.
+Summary table on the 'highly_rated' variable
+
+```{r, echo=FALSE}
+# Sample selection
+asd
+```
+Linear probability model
+
+```{r, echo=FALSE}
+# Sample selection
+lpm
+```
+
+Logit model
+
+```{r, echo=FALSE}
+# Sample selection
+logit
+```
+
+Probit model
+
+```{r, echo=FALSE}
+# Sample selection
+probit
+```
+
+Logit marginal differences 
+
+```{r, echo=FALSE}
+# Sample selection
+logit_marg
+```
+
+Probit marginal differences 
+
+```{r, echo=FALSE}
+# Sample selection
+probit_marg
+```
+
+Brier-score
+
+```{r, echo=FALSE}
+dsa
+```
+
+
+
+
+
+
+
+
